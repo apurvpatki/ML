@@ -2,6 +2,7 @@
 import csv;
 from sklearn.feature_extraction.text import TfidfVectorizer;
 from sys import argv;
+import time;
 
 def readCSVFile(fileName):
 	csvFile  = open(fileName, "rb");
@@ -10,7 +11,8 @@ def readCSVFile(fileName):
 
 	for rowIndex,row in enumerate(reader):
 		if(rowIndex != 0):
-			dictionary.append(row);
+			if row[0] != "" and row[1] != "":
+				dictionary.append(row);
 	csvFile.close();
 
 	return dictionary;
@@ -52,6 +54,15 @@ def extractRelevanceDistribution(trainingData):
 			relevanceMap[score] = 1;
 	return relevanceMap;
 
+def extractAttributeNameistribution(attributes):
+	attributeNames = dict();
+	for attribute in attributes:
+		if attribute[1] in attributeNames:
+			attributeNames[attribute[1]] = attributeNames[attribute[1]] + 1;
+		else:
+			attributeNames[attribute[1]] = 1; 
+	return attributeNames;
+
 def runAnalyzer(fileName, trainingPath):
 	attributes = readCSVFile(fileName);
 	trainingData = readCSVFile(trainingPath);
@@ -60,7 +71,8 @@ def runAnalyzer(fileName, trainingPath):
 	uniqueAttributesNames = extractUniqueAttributeNames(attributes);
 	(relevance1, relevance2, relevance3, relevance12, relevance23) = extractRowsPerRelevance(trainingData);
 
-	relevanceMap = extractRelevanceDistribution(trainingData);
+	relevanceScoreDistribution = extractRelevanceDistribution(trainingData);
+	attributeNameDistriution = extractAttributeNameistribution(attributes);
 
 	print "relevance score = 1 ", relevance1;
 	print "relevance score bettwen (1,2) ", relevance12;
@@ -69,8 +81,9 @@ def runAnalyzer(fileName, trainingPath):
 	print "relevance score = 3 ", relevance3;
 	print "Number of unique product ids is ", len(uniqueProductIds);
 	print "Number of unique attribtues are ", len(uniqueAttributesNames);
-	print "Relevance distribution ", relevanceMap;
-
+	print "Relvance score distribution is ", relevanceScoreDistribution;
+	for key, value in attributeNameDistriution.iteritems():
+		print key , "\t" , value;
 
 attibutesPath = argv[1];
 trainingPath = argv[2];
